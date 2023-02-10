@@ -29,6 +29,25 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                 obj_meta = pyds.NvDsObjectMeta(l_obj.data)
             except StopIteration:
                 break
+            
+            bbox_data = obj_meta.detector_bbox_info
+            print(bbox_data)
+            
+            try:
+                l_obj=l_obj.next
+            except StopIteration:
+                break
                 
+        try:
+            l_frame=l_frame.next
+        except StopIteration:
+            break
+
+    return Gst.PadProbeReturn.OK	
+        
+def main():
+    
+    Gst.init(None)
+    pipeline = Gst.Pipeline()
             
      
