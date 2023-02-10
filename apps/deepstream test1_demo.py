@@ -56,5 +56,48 @@ def main():
     pgie = Gst.ElementFactory.make("nvinfer", "primary-inference")
     nvvidconv = Gst.ElementFactory.make("nvvideoconvert", "convertor")
     nvosd = Gst.ElementFactory.make("nvdsosd", "onscreendisplay")
+    transform = Gst.ElementFactory.make("nvegltransform", "nvegl-transform")
+    sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
+    pgie.set_property('config-file-path', "dstest1_pgie_config.txt")
+    
+    pipeline.add(source)
+    pipeline.add(h264parser)
+    pipeline.add(decoder)
+    pipeline.add(streammux)
+    pipeline.add(pgie)
+    pipeline.add(nvvidconv)
+    pipeline.add(nvosd)
+    pipeline.add(sink)
+    pipeline.add(transform)
+    
+    sinkpad = streammux.get_request_pad("sink_0")
+    srcpad = decoder.get_static_pad("src")
+    
+    source.link(h264parser)
+    h264parser.link(decoder)
+    srcpad.link(sinkpad)
+    streammux.link(pgie)
+    pgie.link(nvvidconv)
+    nvvidconv.link(nvosd)
+    nvosd.link(transform)
+    transform.link(sink)
+    
+    loop = GLib.MainLoop()
+    bus = pipeline.get_bus()
+    bus.add_signal_watch()
+    bus.connect ("message", bus_call, loop)
+    
+    osdsinkpad = nvosd.get_static_pad("sink")
+    osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, 0)
+    
+    pipeline.set_state(Gst.State.PLAYING)
+    try:
+        loop.run()
+    except:
+        pass
+    pipeline.set_state(Gst.State.NULL)
+    
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
             
      
