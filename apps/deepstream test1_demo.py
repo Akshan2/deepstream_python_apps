@@ -49,5 +49,12 @@ def main():
     
     Gst.init(None)
     pipeline = Gst.Pipeline()
+    src = Gst.ElementryFactory.make('filesrc', "filesource")
+    parser = Gst.ElementFactory.make("h264parse", "h264-parser")
+    decoder = Gst.ElementFactory.make("nvv4l2decoder", "nvv4l2-decoder")
+    streammux = Gst.ElementFactory.make("nvstreammux", "Stream-muxer")
+    pgie = Gst.ElementFactory.make("nvinfer", "primary-inference")
+    nvvidconv = Gst.ElementFactory.make("nvvideoconvert", "convertor")
+    nvosd = Gst.ElementFactory.make("nvdsosd", "onscreendisplay")
             
      
